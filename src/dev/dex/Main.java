@@ -7,57 +7,15 @@ import static java.lang.Thread.sleep;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-        String emailRegex = "^.*@gmail.com$";
+        String emailRegex = "^[a-zA-z0-9-_]+@gmail.com$";
         String phoneRegex = "^(\\+359|0)8[7-9][0-9]{7}$";
         String visaRegex = "^4[0-9]{12}([0-9]{3})?$";
 
         System.out.println("===Input Validator===");
 
-        Scanner s = new Scanner(System.in);
-
-        String email = null;
-        int count = 0;
-        do {
-            if (count > 0) {
-                System.out.println("Wrong email");
-            }
-            count++;
-            System.out.println("Email should be gmail");
-            System.out.print("Email: ");
-            email = s.nextLine();
-        } while (!email.matches(emailRegex));
-
-        String phone = null;
-        int count2 = 0;
-        do {
-            if (count2 > 0) {
-                System.out.println("Wrong phone");
-            }
-            count2++;
-            System.out.println("Phone should be Bulgarian");
-            System.out.print("Phone: ");
-            phone = s.nextLine();
-            phone = phone.replaceAll("\\s", "");
-        } while (!phone.matches(phoneRegex));
-
-
-        long visaNumber = 0;
-        int count3 = 0;
-        do {
-            if (count3 > 0) {
-                System.out.println("Wrong Visa");
-            }
-            count3++;
-            System.out.print("Visa: ");
-            String visa = s.nextLine();
-            visa = visa.replaceAll("\\s", "");
-            if (!visa.matches(visaRegex)) {
-                System.out.println("Invalid number of digits");
-                continue;
-            }
-            visaNumber = Long.parseLong(visa);
-
-        } while (!checkVisa(visaNumber));
+        validateInput("Email", "Email should be Gmail.\n", emailRegex);
+        validateInput("Phone", "Phone should be Bulgarian.\n", phoneRegex);
+        validateInput("Visa", "", visaRegex);
 
         for (int i = 0; i < 30; i++) {
             System.out.print("=");
@@ -67,19 +25,47 @@ public class Main {
 
     }
 
-    private static boolean checkVisa(long cardNumber) {
+    private static void validateInput(String type, String message, String regex) {
+        Scanner s = new Scanner(System.in);
+
+        String input = null;
+        int count = 0;
+        Function<String, Boolean> f = (in) -> in.matches(regex);
+        if (type == "Visa") {
+            f = Main::checkVisa;
+        }
+        do {
+            if (count > 0) {
+                System.out.println("Wrong " + type + ".");
+            }
+            count++;
+            System.out.print(message);
+            System.out.print(type + ": ");
+            input = s.nextLine();
+            if (type != "Email") {
+                input = input.replaceAll("\\s", "");
+            }
+            if (type == "Visa" && !input.matches(regex)) {
+                System.out.println("Visa must be 16 or 19 numbers.");
+                continue;
+            }
+        } while (!f.apply(input));
+    }
+
+    private static boolean checkVisa(String visa) {
+        long visaNumber = Long.parseLong(visa);
         int sumOfMultipliedDigits = 0;
         int sumOfDigits = 0;
-        while (cardNumber > 0) {
-            sumOfDigits += cardNumber%10;
-            cardNumber /= 10;
-            int curr = (int)(cardNumber%10) * 2;
+        while (visaNumber > 0) {
+            sumOfDigits += visaNumber%10;
+            visaNumber /= 10;
+            int curr = (int)(visaNumber%10) * 2;
             if (curr > 10) {
                 curr = curr%10 + curr/10;
             }
 
             sumOfMultipliedDigits += curr;
-            cardNumber/=10;
+            visaNumber/=10;
         }
         int sum = sumOfDigits+sumOfMultipliedDigits;
         if (sum%10 == 0) return true;
