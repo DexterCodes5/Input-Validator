@@ -47,12 +47,13 @@ public class Main {
             }
             if (type == "Visa" && !input.matches(regex)) {
                 System.out.println("Visa must be 16 or 19 numbers.");
-                continue;
+                input = null;
             }
         } while (!f.apply(input));
     }
 
     private static boolean checkVisa(String visa) {
+        if (visa == null) return false;
         long visaNumber = Long.parseLong(visa);
         int sumOfMultipliedDigits = 0;
         int sumOfDigits = 0;
